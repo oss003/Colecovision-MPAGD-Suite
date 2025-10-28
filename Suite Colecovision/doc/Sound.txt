@@ -1,0 +1,72 @@
+BBC:		FE40-FE4F
+Colecovision:	E0-FF
+
+BBC in the vsync routine:
+
+	lda sndtyp
+	beq sndskip
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------
+; beep effect using psg channel 0
+;-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+	php		; save irq interrupt state
+
+	sei		; disable interrupts
+	
+	lda #$0b	; disable keyboard output that drives bit 7 of via port A
+	sta $fe40
+
+	lda #$ff	; via port A bits 0 - 7 output
+	sta $fe43
+
+	lda #$90	; psg channel 0 full volume
+	jsr psgWrite
+
+beepLoop:
+
+	lda sndtyp	; update low 4 bits of psg channel 0 tone register with 2 bits from sndtyp
+	and #3
+	asl a
+	asl a
+	ora #$80
+	jsr psgWrite
+
+	lda sndtyp	; update high 6 bits of psg channel 0 tone register with 6 bits from sndtyp
+	lsr a
+	lsr a
+	jsr psgWrite
+
+	ldy sndtyp	; do the half cycle delay
+
+beepWait:
+
+	dey
+	bne beepWait
+	
+	dec sndtyp	; reduce delay by 1
+	bne beepLoop	; repeat above until delay = 0
+	
+	lda #$9f	; channel 0 volume off
+	jsr psgWrite
+
+	lda #$7f	; via port A bit 7 input from keyboard output
+	sta $fe4f
+	
+	lda #$03	; enable keyboard output
+	sta $fe40
+	
+	plp		; restore irq state
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+sndskip: 
+	pla
+	tax
+	pla
+	tay
+	pla
+	rts
+
+sndtyp:		.byte 0
+

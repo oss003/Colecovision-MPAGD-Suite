@@ -1,0 +1,92 @@
+Sjasm Z80 Assembler v0.42c - www.xl2s.tk             [2025.10.24 - 16:01:45]
+
+keytest.asm
+Errors: 0
+
+       1   00:0000  (00:1105)           CONTROLLER_INIT:	equ $1105
+       2   00:0000                      
+       3   00:0000                      ; Cartridge header
+       4   00:0000                      
+       5   00:0000  AA 55               	db $aa,$55		; Cartridge type
+       6   00:0002  00 00               	dw $0000		; LOCAL_SPR_TBL
+       7   00:0004  00 00               	dw $0000		; SPRITE_ORDER
+       8   00:0006  00 00               	dw $0000		; WORK_BUFFER
+       9   00:0008  57 00               	dw CONTROLLER_BUFFER	; CONTROLLER_MAP
+      10   00:000A  3F 00               	dw init			; START_GAME
+      11   00:000C                      rst_8:
+      12   00:000C  ED 4D               	reti
+      13   00:000E  00                  	nop
+      14   00:000F                      rst_10:
+      15   00:000F  ED 4D               	reti
+      16   00:0011  00                  	nop
+      17   00:0012                      rst_18:
+      18   00:0012  ED 4D               	reti
+      19   00:0014  00                          nop
+      20   00:0015                      rst_20:
+      21   00:0015  ED 4D               	reti
+      22   00:0017  00                  	nop
+      23   00:0018                      rst_28:
+      24   00:0018  ED 4D               	reti
+      25   00:001A  00                  	nop
+      26   00:001B                      rst_30:
+      27   00:001B  ED 4D               	reti
+      28   00:001D  00                  	nop
+      29   00:001E                      rst_38:			; IRQ_INT_VECT
+      30   00:001E  ED 4D               	reti
+      31   00:0020  00                  	nop
+      32   00:0021                      nmi_vec:		; NMI_INT_VECT
+      33   00:0021  C3 55 00            	jp NMI
+      34   00:0024                      
+      35   00:0024                      	db "AGDGAME/PRESENTS MPAGD/2025"
+      35   00:0024  41 47 44 47 41 4D 45 2F 50 52 45 53 45 4E 54 53 
+      35   00:0034  20 4D 50 41 47 44 2F 32 30 32 35 
+      36   00:003F                      init:
+      37   00:003F  F3                  	di
+      38   00:0040  3E 01               	ld a,1		; Enable SGM
+      39   00:0042  D3 53               	out ($53),a
+      40   00:0044                      
+      41   00:0044  3E 1F               	ld a,00011111b	; Enable BIOS
+      42   00:0046  D3 7F               	out ($7f),a
+      43   00:0048                      
+      44   00:0048                      ;Enable both joysticks, buttons, keypads
+      45   00:0048                      
+      46   00:0048  21 9B 9B            		ld hl,09b9bh
+      47   00:004B  22 57 00            		ld (CONTROLLER_BUFFER),hl
+      48   00:004E  AF                  		xor a
+      49   00:004F  CD 05 11            		call CONTROLLER_INIT    
+      50   00:0052                      
+      51   00:0052                      loop:
+      52   00:0052  C3 52 00            	jp loop
+      53   00:0055                      
+      54   00:0055                      NMI:
+      55   00:0055  ED 45               	retn
+      56   00:0057                      
+      57   00:0057                      CONTROLLER_BUFFER:
+      58   00:0057  00 (12)             	ds 12
+      59   00:0063                      
+
+    LABELS
+-------------------------------------------------
+00:00001105   CONTROLLER_INIT
+00:0000000C X rst_8
+00:0000000F X rst_10
+00:00000012 X rst_18
+00:00000015 X rst_20
+00:00000018 X rst_28
+00:0000001B X rst_30
+00:0000001E X rst_38
+00:00000021 X nmi_vec
+00:0000003F   init
+00:00000052   loop
+00:00000055   NMI
+00:00000057   CONTROLLER_BUFFER
+
+
+ Output: keytest.out
+-------------------------------------------------
+
+ Page: 00
+  Org: 00000000  Size: *  Used: 00000063
+
+   Address   Length Align   Label
+   00000000      99         rst_8
