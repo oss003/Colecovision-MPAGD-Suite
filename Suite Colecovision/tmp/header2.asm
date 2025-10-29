@@ -34,12 +34,12 @@ NMI:
 	PUSH	HL
 	PUSH	IX
 	PUSH	IY
-	EX	AF,AF'
-	PUSH	AF
-	EXX
-	PUSH	BC
-	PUSH	DE
-	PUSH	HL
+;	EX	AF,AF'
+;	PUSH	AF
+;	EXX
+;	PUSH	BC
+;	PUSH	DE
+;	PUSH	HL
 
 ; Increment time to sync framerate at 25 Hz
 
@@ -48,16 +48,25 @@ NMI:
 	inc a
 	ld (hl),a
 
+; Increment clock
+
+	ld hl,MSX_JIFFY
+	ld a,(hl)
+	inc a
+	ld (hl),a
+
+; Scan keys
+
 	call POLLER
 
 ;Now restore everything
 
-	POP	HL
-	POP	DE
-	POP	BC
-	EXX
-	POP	AF
-	EX	AF,AF'
+;	POP	HL
+;	POP	DE
+;	POP	BC
+;	EXX
+;	POP	AF
+;	EX	AF,AF'
 	POP	IY
 	POP	IX
 	POP	HL

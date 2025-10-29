@@ -39,7 +39,7 @@ set MSXFDI=Sony_HBD-F1
 set "HEXA=0123456789ABCDEF"
 
 REM (always $4000)
-set RAMSTART=12288
+set RAMSTART=16384
 REM (MSX 64KB without disk drives = $F380)
 set CASHIMEM=62336
 REM (MSX 64KB with at least 1 drive = $E470)
@@ -615,12 +615,13 @@ REM	del sjasm.log *.bin %NAME%.dsk >NUL 2>&1
 	if %MEMORY% equ 48 (
 		set BSTART=56
 	) else (
-		set BSTART=16384+16384
+		set BSTART=32768
 	)
+
 	set /a BSIZE = BEND - BSTART
 	set /a VSTART = RAMSTART
-	set /a VEND = 8192 + DSIZE
-	set /a FREERAM = HIMEM - RAMSTART - DSIZE
+	set /a VEND = 16384 + DSIZE
+	set /a FREERAM = RAMSTART - DSIZE
 	call :DECTOHEX BSTART
 	call :DECTOHEX BEND
 	call :DECTOHEX VSTART

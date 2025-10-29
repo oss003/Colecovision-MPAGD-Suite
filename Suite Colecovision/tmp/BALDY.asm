@@ -309,7 +309,7 @@ a01113 ld a,11
        and $0F
        or e
        ld (clratt),a
-       ld a,2
+       ld a,11
        ld e,a
        ld a,(clratt)
        and $F0
@@ -319,12 +319,12 @@ a01113 ld a,11
        call dmsg
        ld a,4
        ld (loopa),a
-a01210 ld a,2
+a01211 ld a,2
        ld c,0
        call sfx_set
        ld hl,loopa
        dec (hl)
-       jp nz,a01210
+       jp nz,a01211
        push ix
        ld b,100
        call delay
@@ -1491,6 +1491,16 @@ j00113 ld a,4
 j00142 ret
 
 evnt10:	equ $
+       ld a,6
+       add a,a
+       add a,a
+       add a,a
+       add a,a
+       ld e,a
+       ld a,(clratt)
+       and $0F
+       or e
+       ld (clratt),a
        xor a
        ld (charx),a
        ld a,7
@@ -1501,16 +1511,6 @@ evnt10:	equ $
        ld (charx),a
        ld a,30
        ld (chary),a
-       ld a,2
-       add a,a
-       add a,a
-       add a,a
-       add a,a
-       ld e,a
-       ld a,(clratt)
-       and $0F
-       or e
-       ld (clratt),a
        xor a
        ld e,a
        ld a,(clratt)
@@ -1625,7 +1625,7 @@ evnt12:	equ $
        ld (charx),a
        ld a,11
        ld (chary),a
-       ld a,6
+       ld a,11
        add a,a
        add a,a
        add a,a
@@ -1674,7 +1674,7 @@ evnt12:	equ $
        ld (charx),a
        ld a,4
        ld (chary),a
-       ld a,3
+       ld a,13
        add a,a
        add a,a
        add a,a
@@ -1708,7 +1708,7 @@ evnt12:	equ $
        ld (charx),a
        ld a,5
        ld (chary),a
-       ld a,2
+       ld a,6
        add a,a
        add a,a
        add a,a
@@ -1733,10 +1733,10 @@ evnt12:	equ $
        call MSX_WRTVDP
        ld a,99
        ld (contrl),a
-m00549 ld a,99
+m00550 ld a,99
        ld hl,contrl
        cp (hl)
-       jp nz,m00703
+       jp nz,m00704
        ld hl,keys+14
        ld a,(hl)
        inc hl
@@ -1750,25 +1750,25 @@ m00602 ld hl,keys+16
        inc hl
        ld d,(hl)
        call ktest
-       jp c,m00637
+       jp c,m00638
        ld a,1
        ld (contrl),a
-m00637 ld hl,keys+18
+m00638 ld hl,keys+18
        ld a,(hl)
        inc hl
        ld d,(hl)
        call ktest
-       jp c,m00672
+       jp c,m00673
        ld a,2
        ld (contrl),a
-m00672 ld hl,keys+20
+m00673 ld hl,keys+20
        ld a,(hl)
        inc hl
        ld d,(hl)
        call ktest
        jp c,m00699
-m00699 jp m00549
-m00703 ld a,3
+m00699 jp m00550
+m00704 ld a,3
        ld (MSX_BDRCLR),a
        ld b,a
        ld c,7
@@ -1866,12 +1866,12 @@ evnt14:	equ $
        ld hl,varf
        cp (hl)
        jp nz,o00160
-       jp o00423
+       jp o00424
 o00160 xor a
        ld (charx),a
        ld a,1
        ld (chary),a
-       ld a,2
+       ld a,6
        add a,a
        add a,a
        add a,a
@@ -1893,7 +1893,7 @@ o00160 xor a
        ld (charx),a
        ld a,12
        ld (chary),a
-       ld a,3
+       ld a,13
        add a,a
        add a,a
        add a,a
@@ -1915,7 +1915,7 @@ o00160 xor a
        ld (charx),a
        ld a,24
        ld (chary),a
-       ld a,2
+       ld a,6
        add a,a
        add a,a
        add a,a
@@ -1933,7 +1933,7 @@ o00160 xor a
        ld (clratt),a
        ld a,4
        call dmsg
-o00423 ret
+o00424 ret
 
 evnt15:	equ $
        xor a
@@ -2021,20 +2021,20 @@ evnt20:	equ $
        ret
 ptcusr ret
 msgdat:	equ $
-       db "GAME OVER",141
-       db "BALDY ZX",141
-       db "-NEXT LEVEL-",141
-       db "LEVEL:",141
-       db "LIVES:",141
-       db "SELECT CONTROL",141
-       db "1.............KEYBOARD",141
-       db "2....KEMPSTON JOYSTICK",141
-       db "3....SINCLAIR JOYSTICK",141
-       db ";PAUL JENKINSON 2015",141
-       db "CONGRATULATIONS",141
-       db "BALDY HAS COLLECTED ALL",141
-       db "OF HIS GAMES",141
-       db "BALDY IS IN NEED OF WINE!",141
+       db "GAME OVE",210
+       db "BALDY Z",216
+       db "-NEXT LEVEL",173
+       db "LEVEL",186
+       db "LIVES",186
+       db "SELECT CONTRO",204
+       db "1.............KEYBOAR",196
+       db "2...........JOYSTICK ",177
+       db "3...........JOYSTICK ",178
+       db ";PAUL JENKINSON 201",181
+       db "CONGRATULATION",211
+       db "BALDY HAS COLLECTED AL",204
+       db "OF HIS GAME",211
+       db "BALDY IS IN NEED OF WINE",161
 nummsg db 14
 scdat:	equ $
        defw 83,72,72,57,62,58,52,60,53,101,56,43,60,70,50,65,48,49,41,37,21
@@ -2690,6 +2690,9 @@ start:
 		ld bc,(varend-varbegin)-1
 		ld (hl),0
 		ldir
+
+	ld a,1
+	ld (contrl),a
 
 ;		;init mapper
 ;		ld	a,1
@@ -3490,13 +3493,15 @@ iniob:
 ; Screen synchronisation.
 
 vsync:
+	push af
+	push hl
 	call buildspr
-;	call POLLER
+	if PFLAG
+		call proshr
+	endif
 	call joykey
 
 ; Sync framerate to 25 Hz
-
-	push hl
 
 check_if_enough_frames_passed:
 	ld hl,time
@@ -3512,191 +3517,193 @@ check_if_enough_frames_passed:
 
 	xor a			; sync framerate 25 Hz
 	ld (hl),a
+
 	pop hl
+	pop af
 
 	ret
 ;		ld hl,MSX_JIFFY
 ;		ld a,(hl)
-
-	if SFLAG
-		push af
-		push hl
-		call scrltxt
-		pop hl
-		pop af
-		cp (hl)
-		jr z,.novbl0
-		call scrly
-	if PFLAG
+;
+;	if SFLAG
+;		push af
+;		push hl
+;		call scrltxt
+;		pop hl
+;		pop af
+;		cp (hl)
+;		jr z,.novbl0
+;		call scrly
+;	if PFLAG
+;;		call proshr
+;	endif
+;		call buildspr
+;	ret
+;	if EFLAG
+;		call beeper
+;	endif
+;		call joykey
+;		jr .nowait
+;		
+;.novbl0:		
+;	endif
+;
+;	if PFLAG
+;		
+;		push af
+;		push hl
 ;		call proshr
-	endif
-		call buildspr
-	ret
-	if EFLAG
-		call beeper
-	endif
-		call joykey
-		jr .nowait
-		
-.novbl0:		
-	endif
-
-	if PFLAG
-		
-		push af
-		push hl
-		call proshr
-		pop hl
-		pop af
-		cp (hl)
-		jr z,.novbl1
-	if SFLAG
-		call scrly
-	endif
-		call buildspr
-	if EFLAG
-		call beeper
-	endif
-		call joykey
-		jr .nowait
-		
-.novbl1:		
-	endif
-		
-		push af
-		push hl
-		call buildspr
-		pop hl
-		pop af
-		cp (hl)
-		jr z,.novbl2
-	if SFLAG
-		call scrly
-	endif
-	if EFLAG
-		call beeper
-	endif
-		call joykey
-		jr .nowait
-
-.novbl2:
-	if EFLAG
-		call beeper
-	endif
-		cp (hl)
-		jr z,.novbl3
-	if SFLAG
-		call scrly
-	endif
-		call joykey
-		jr .nowait
-		
-.novbl3:
-		push af
-		push hl
-		call joykey
-		pop hl
-		pop af
-		cp (hl)
-		; jr z,.novbl5
-		jr z,.wait
-	if SFLAG
-		call scrly
-	endif
-		jr .nowait
-		
-.wait:		
-	ifdef DEBUG
-		BORDER 13
-	endif
-		cp (hl)
-		jr z,.wait
-	if SFLAG
-		call scrly
-	endif
-	
-.nowait:
-	ifdef DEBUG
-		BORDER 14
-	endif
-		ret
-
-	if EFLAG
-	
+;		pop hl
+;		pop af
+;		cp (hl)
+;		jr z,.novbl1
+;	if SFLAG
+;		call scrly
+;	endif
+;		call buildspr
+;	if EFLAG
+;		call beeper
+;	endif
+;		call joykey
+;		jr .nowait
+;		
+;.novbl1:		
+;	endif
+;		
+;		push af
+;		push hl
+;		call buildspr
+;		pop hl
+;		pop af
+;		cp (hl)
+;		jr z,.novbl2
+;	if SFLAG
+;		call scrly
+;	endif
+;	if EFLAG
+;		call beeper
+;	endif
+;		call joykey
+;		jr .nowait
+;
+;.novbl2:
+;	if EFLAG
+;		call beeper
+;	endif
+;		cp (hl)
+;		jr z,.novbl3
+;	if SFLAG
+;		call scrly
+;	endif
+;		call joykey
+;		jr .nowait
+;		
+;.novbl3:
+;		push af
+;		push hl
+;		call joykey
+;		pop hl
+;		pop af
+;		cp (hl)
+;		; jr z,.novbl5
+;		jr z,.wait
+;	if SFLAG
+;		call scrly
+;	endif
+;		jr .nowait
+;		
+;.wait:		
+;	ifdef DEBUG
+;		BORDER 13
+;	endif
+;		cp (hl)
+;		jr z,.wait
+;	if SFLAG
+;		call scrly
+;	endif
+;	
+;.nowait:
+;	ifdef DEBUG
+;		BORDER 14
+;	endif
+;		ret
+;
+;	if EFLAG
+;	
 beeper:
-	ifdef DEBUG
-		BORDER 15
-	endif
-		ld e,a				; keeps JIFFY
-		ld a,(sndtyp)       ; sound to play.
-		and a               ; any sound?
-		jr z,beep1			; no.
-		ld b,a              ; outer loop.
-		and a               ; test it.
-		ld c,14				; first value to write (0)
-		jp m,noise          ; play white noise.
-.beep2:
-		ld a,c              ; (5) get speaker value.
-		out (MSX_PPICM),a   ; (12) write to speaker.
-		xor 1               ; (7) toggle bit 0.
-		ld c,a              ; (5) store value for next time.
-		ld d,b              ; (5) store loop counter.
-		
-		ld a,(snddelay)
-		or a
-		jr z,.nodelay
-		ld b,a
-		djnz $
-		ld b,d
-.nodelay:		
-		ld a,e				; (5) restore old JiFFY
-.beep3:
-		cp (hl)				; (8) next frame?
-		jr nz,.beep4		; (8/13) yes, no more processing please.
-		djnz .beep3         ; (14/9) loop while frame doesn't changes.
-		
-		ld b,d              ; (5) restore loop counter.
-		djnz .beep2         ; (14/9) continue noise.
-							; (87)
-.beep4:
-		ld a,d              ; where we got to.
-vsynca:
-		ld (sndtyp),a       ; remember for next time.
-beep1:		
-		ld a,e
-
-	ifdef DEBUG
-		BORDER 14
-	endif
-
-		ret
+;	ifdef DEBUG
+;		BORDER 15
+;	endif
+;		ld e,a				; keeps JIFFY
+;		ld a,(sndtyp)       ; sound to play.
+;		and a               ; any sound?
+;		jr z,beep1			; no.
+;		ld b,a              ; outer loop.
+;		and a               ; test it.
+;		ld c,14				; first value to write (0)
+;		jp m,noise          ; play white noise.
+;.beep2:
+;		ld a,c              ; (5) get speaker value.
+;		out (MSX_PPICM),a   ; (12) write to speaker.
+;		xor 1               ; (7) toggle bit 0.
+;		ld c,a              ; (5) store value for next time.
+;		ld d,b              ; (5) store loop counter.
+;		
+;		ld a,(snddelay)
+;		or a
+;		jr z,.nodelay
+;		ld b,a
+;		djnz $
+;		ld b,d
+;.nodelay:		
+;		ld a,e				; (5) restore old JiFFY
+;.beep3:
+;		cp (hl)				; (8) next frame?
+;		jr nz,.beep4		; (8/13) yes, no more processing please.
+;		djnz .beep3         ; (14/9) loop while frame doesn't changes.
+;		
+;		ld b,d              ; (5) restore loop counter.
+;		djnz .beep2         ; (14/9) continue noise.
+;							; (87)
+;.beep4:
+;		ld a,d              ; where we got to.
+;vsynca:
+;		ld (sndtyp),a       ; remember for next time.
+;beep1:		
+;		ld a,e
+;
+;	ifdef DEBUG
+;		BORDER 14
+;	endif
+;
+;		ret
 
 ; Play white noise
 
-noise: 
-		sub 127
-		ld b,a				; outer loop
-vsync7:
-		ld a,r              ; get random speaker value.
-		and 2               ; only retain the speaker/earphone bits.
-		rrca
-		or c                ; merge with command PPI bit 7.
-		out (MSX_PPICM),a   ; write to speaker.
-		ld a,e				; restore old JiFFY
-		cp (hl)             ; subtract last reading.
-		jp nz,vsync8        ; yes, no more processing please.
-		ld a,b
-		;and 127
-		inc a
-vsync9:
-		dec a
-		jr nz,vsync9        ; loop.
-		djnz vsync7         ; continue noise.
-vsync8:
-		xor a
-		jr vsynca
-
-	endif
+;noise: 
+;		sub 127
+;		ld b,a				; outer loop
+;vsync7:
+;		ld a,r              ; get random speaker value.
+;		and 2               ; only retain the speaker/earphone bits.
+;		rrca
+;		or c                ; merge with command PPI bit 7.
+;		out (MSX_PPICM),a   ; write to speaker.
+;		ld a,e				; restore old JiFFY
+;		cp (hl)             ; subtract last reading.
+;		jp nz,vsync8        ; yes, no more processing please.
+;		ld a,b
+;		;and 127
+;		inc a
+;vsync9:
+;		dec a
+;		jr nz,vsync9        ; loop.
+;		djnz vsync7         ; continue noise.
+;vsync8:
+;		xor a
+;		jr vsynca
+;
+;	endif
 	
 ; Redraw the screen.
 
@@ -3864,7 +3871,7 @@ proshloop:
 	endif
 	
 setshr:
-;		ld a,(MSX_JIFFY)
+		ld a,(MSX_JIFFY)
 setshr0:
 		ld hl,SHRAPN+SHRSIZ        ; table.
 		rrca
@@ -3967,7 +3974,7 @@ shrap:
 		ei
 		ld sp,(stack)            ;parameter will overwritten
 		ret
-		
+
 dotl:   dec (ix+5)          ; move left.
         ret
 dotr:   inc (ix+5)          ; move left.
@@ -5795,7 +5802,8 @@ droom1:
 		ld (dispx),a        ; set new position.
 		dec c
 		jr nz,droom0
-		jp enascreen
+;		jp enascreen
+		ret
 
 /*
 ; HL = pointer to packed screen data
@@ -6241,6 +6249,25 @@ keypressed:
 	and a
 	ret	
 
+jtest:
+	push bc
+	push hl
+	ld bc,0
+	ld c,d
+	ld hl,CONTROLLER_BUFFER
+	add hl,bc
+	and (hl)
+	jr nz,jkeypressed
+	pop hl
+	pop bc
+	scf
+	ret
+jkeypressed:
+	pop hl
+	pop bc
+	and a
+	ret	
+
 ;		call MSX_SNSMAT
 ;		and d
 ;		ret z
@@ -6353,7 +6380,7 @@ readkeys:
 		dec hl
 		ld a,(hl)	    ; get row
 		dec hl
-		call ktest          ; is key pressed (C=0)?
+		call jtest
 		ccf                 ; complement the result (0=not pressed,1=pressed).
 		rl e                ; rotate into reading.
 		djnz .loop          ; repeat for all keys.
@@ -7145,6 +7172,7 @@ animbk:
 ; Input:
 ;	C = NUmber of sprite to check for collision
 sktyp:  
+		ld b,c
 		ld a,(highslot)
 		and a
 		ret z				; no sprites, nothing to do
@@ -7165,7 +7193,7 @@ sktyp:
 		ex af,af            ; store loop counter.
 		ld (skptr),hl       ; store pointer to sprite.
 		ld a,(hl)           ; get sprite type.
-		cp c                ; is it the type we seek?
+		cp b                ; is it the type we seek?
 		jr z,coltyp         ; yes, we can use this one.
 .sktyp1: 
 		ld hl,(skptr)       ; retrieve sprite pointer.
@@ -7188,7 +7216,7 @@ sktyp:
 
 coltyp:
 		ld a,(ix+0)         ; current sprite type.
-		cp c                ; seeking sprite of same type?
+		cp b                ; seeking sprite of same type?
 		jr z,.colty1        ; yes, need to check we're not detecting ourselves.
 .colty0:
 		ld de,X             ; distance to x position in table.
