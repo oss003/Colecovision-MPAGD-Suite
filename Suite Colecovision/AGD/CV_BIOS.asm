@@ -6,6 +6,7 @@ WRITE_REGISTER:		equ $1fd9
 PATSIZE:		equ (sprgfx-chgfx)/8
 CONTROLLER_INIT:	equ $1105
 POLLER:			equ $1feb
+clock:			equ MSX_JIFFY
 
 ;-----------------------------------------------------------
 ; - Setup Screen 2,2
@@ -58,12 +59,12 @@ CV_CLS:
 	push bc
 	ld hl,MSX_CHRTBL		; Clear char table
         xor a
-	call FILVRM
+	call CV_FILVRM
 
 	ld hl,MSX_CLRTBL		; Clear colour tabel
 	ld a,(MSX_BAKCLR)
 	pop bc
-	call FILVRM
+	call CV_FILVRM
 
 	ret
 
@@ -73,7 +74,7 @@ CV_CLS:
 ; BC = Length
 ;-----------------------------------------------------------
 
-FILVRM:
+CV_FILVRM:
 	ld e,a
 	call CV_SETWRT
 FLOOP:
@@ -103,8 +104,9 @@ CV_SETWRT:
 	ret
 
 ;-----------------------------------------------------------
-; Set data in VRAM
+; Write data in VRAM
 ; HL = VRAM Address
+; A  = data
 ;-----------------------------------------------------------
 
 CV_WRTVRM:
@@ -114,4 +116,17 @@ CV_WRTVRM:
 	out (MSX_VDPDRW),a
 	ret
 
+;-----------------------------------------------------------
+; Read data from VRAM
+; HL = VRAM Address
+; A  = data
+;-----------------------------------------------------------
 
+CV_RDVRM:
+	ld a,l
+	out (MSX_VDPCW),a 
+	ld a,h
+	and 3Fh
+	out (MSX_VDPCW),a
+	in a,(MSX_VDPSR)
+	ret

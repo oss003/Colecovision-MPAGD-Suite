@@ -1,0 +1,550 @@
+;---------------------------------------------
+Memory map Colecovision:
+;---------------------------------------------
+
+Standard:
+
+0000H - 1FFFH	BIOS ROM
+2000H - 3FFFH	Expansion port
+4000H - 5FFFH	Expansion port
+6000H - 7FFFH	Start of RAM (1K mapped into an 8K spot)
+8000H - FFFFH	Cart ROM (broken into 4 sections, each enabled seperately)
+
+SGM:
+
+0000H - 1FFFH	BIOS ROM/RAM
+2000H - 7FFFH	RAM
+8000H - FFFFH	Cart ROM (broken into 4 sections, each enabled seperately)
+
+;---------------------------------------------
+MPAGD Memory map:
+;---------------------------------------------
+
+----
+MSX:
+----
+$4000-$7fff	16 kB	ROM
+  $4000			Header $41,$42
+$8000-$bfff	16 kB	ROM
+$e000-$ffff	 8 kB	RAM
+  $f380-$ffff		Stack
+
+page 0,$4000,$4000	16 kB	ROM
+page 1,$8000,$4000	16 kB	ROM
+
+-------------
+Colecovision:
+-------------
+$0000-$7fff	32 kB	RAM
+  $2000-$3fff		Stack
+  $4000-$7fff	16 kB	RAM
+$8000-$ffff	32 kB	ROM
+  $8000			Header $aa,$55
+
+page 0,$4000,$4000	16 kB	ROM
+page 1,$8000,$4000	16 kB	ROM
+
+;---------------------------------------------
+I/O:
+;---------------------------------------------
+
+00-1F - No Connection
+20-3F - No Connection
+40-5F - Video
+60-7F - Video
+80-9F - No Connection
+A0-BF - No Connection
+C0-DF - Sound
+E0-FF - Controllers; E2 is special, as wellas E0
+	 - E0 appears to be the readback, and E2 appears to be the scan - 39
+
+80-9F - Set keypad mode		write
+C0-DF - Video (VDC) registers	read/write
+E0-DF - Set joystick mode	write
+E0-FF - Sound registers		write
+E0-FF - Controllers		read
+
+;---------------------------------------------
+VDU registers:
+;---------------------------------------------
+
+NOTE:
+
+-bit 0 is MSB (ie: 0 1 2 3 4 5 6 7, 0=128 and 7=1)
+-"enables" are active when set to 1
+-">" represents a hexadecimal number (ie: >400 = 400 hex)
+
+Register 0	- Bits 0-5 - Reserved, set to 000000
+		  Bit 6	   - Mode bit 3 (M3) - sets bitmap mode
+		  Bit 7	   - Enable external video source
+				 (replaces color 1 (transparent))
+Register 1	- Bit 7	   - 4/16k switch, if set, uses 16k
+		  Bit 6	   - blank enable (blanks display)
+		  Bit 5	   - Interrupt enable
+		  Bit 4	   - Mode bit 1 (M1) - sets text mode
+		  Bit 3	   - Mode bit 2 (M2) - sets multicolor mode
+		  Bit 2	   - reserved - set to 0
+		  Bit 1	   - sprite size
+				 - 0=normal (8x8), 1=large (16x16)
+		  Bit 0	   - sprite magnification enable
+Register 2	  Base address of the Screen Image Table.
+			Multiply this value by >400
+Register 3	  Base address of the Color Table.
+			Multiply this value by >400
+Register 4	  Base address of the Pattern Descriptor Table.
+			Multiply this value by >800
+Register 5	  Base address of the Sprite Attribute List.
+			Multiply this value by >80
+Register 6	  Base address of the Sprite Descriptor Table.
+			Multiply this value by >800
+Register 7	- Bits 0-3 - Foreground color in Text mode only
+		  Bits 4-7 - Background color in all modes
+
+The mode bits, M1, M2 and M3 determine the mode of the display. 
+If they are all 0, the display is in Graphics mode. 
+Else as listed above. 
+Below the various modes are explained.
+
+;---------------------------------------------
+Graphic modes:
+;---------------------------------------------
+
+Graphics mode uses an array of 32 columns by 24 lines. 
+Each position may have one of the 256 patterns in the pattern table 
+(usually including ASCII characters). 
+Foreground and background colors may be set for the characters, 
+and sprites are available.
+
+;---------------------------------------------
+Screen image table
+;---------------------------------------------
+
+This specifies which character occupies each position on the screen. 
+It is 768 bytes long. 
+Whatever byte is at each position is what appears at that location.
+
+To calculate an address from X and Y, 
+use (Y*32)+X (or (Y<<5)+x) and add the base address.
+
+;---------------------------------------------
+MULTICOLOR MODE
+;---------------------------------------------
+ 
+In multicolor mode, the screen is 48 rows, and 64 columns wide, 
+with each 'box' being 4 pixels by 4 pixels. 
+There are thus 3072 boxes, each of which can be a different color with no restrictions. 
+Sprites are available.
+
+The general way to set up is like so:
+
+SCREEN IMAGE TABLE
+
+Initialize the Screen Image Table so that the 
+first >80 bytes contain >00 through >1F repeated 4 times, 
+the next >80 bytes contain >20 through >3F repeated 4 times, 
+and so on, 
+so that the last >80 bytes contain >A0 through >BF repeated 4 times.
+
+PATTERN DESCRIPTOR TABLE
+
+The pattern descriptor table now contains colors, instead of patterns. 
+They are still organized in 8-character blocks, 
+with each byte describing the colors of two boxes. 
+The high nibble is the first block, and the low nibble is the block to it's right.
+
+The first byte defines the first two blocks in row 1. 
+The second byte is the first two blocks in row 2. 
+This continues until the eighth byte (the first two blocks in row 8), 
+and then goes back to row one. 
+This continues until the first 32 eight-byte segments have been defined, 
+describing all the blocks in the first 8 rows.
+
+It's very messy... but draw yourself a picture and it should make sense.
+
+Essentially, each entry in the screen image table still points to an 8-byte 'definition', 
+but the definition defines the colours, not the pixels, now, 
+making each character a 2x8 colored group. :) 
+Initializing the screen image table as above lets you change 
+the screen by editing the pattern descriptor table, but it's not the only way. :)
+
+;---------------------------------------------
+BITMAP MODE
+;---------------------------------------------
+ 
+Bitmap mode allows independantly defining each of the 768 screen positions, 
+and allows a bit more color freedom as well. 
+Sprites are also allowed. As normal, 
+the patterns for each position are in the Screen Image Table, 
+the descriptions are in the Pattern Descriptor Table, 
+and the colors are in the Color Table.
+
+SCREEN IMAGE TABLE
+
+As before, each entry is a single byte from >00 to >FF defining which pattern 
+to place at each location. 
+In bitmap mode, however, it is divided into 3 sections of 256 bytes each, 
+each pointing essentially to a different character set. 
+The first section uses the first 256 entries in the pattern and color table, 
+the second section uses the next 256 entries, 
+and the third uses the last 256 entries. 
+Normally this table is set at >1800 (assuming 16k VDP ram) (VDP register 2 = >06)
+
+PATTERN DESCRIPTOR TABLE
+It works the same as in graphics mode, except that there are now 3 sections, 
+each 256 patterns long, allowing 768 possible patterns. It's size is 6144 bytes.
+
+The first section is for the first third of the screen, and so on.
+
+It should normally be placed at either >0000 or >2000 (VDP register 4 = >00 or >04). 
+The color table will sit at the other address.
+
+COLOR TABLE
+
+The color table works much like it did in graphics mode, 
+except that each entry now defines a single character, 
+and every row of that character has it's own color entry. 
+It matches byte-for-byte the entries in the pattern descriptor table, 
+with the high nibble being the foreground colour, 
+and the low nibble being the background color for that row of the pattern.
+
+It is also divided into three 256 character sections, 
+and each entry is also 8 bytes long. 
+It is 6144 bytes long, 
+and should be placed at either >0000 or >2000, 
+whichever the PDT is not at. (VDP register 3 = >00 or >04).
+
+DISCUSSION of bitmap mode
+
+For using bitmap mode, it is usually easiest (but not fastest!) to initialize 
+the Screen Image Table with >00 through >FF three times, 
+and then alter the entries in the Pattern Descriptor table and Color table.
+
+Thus, to alter a pixel on the screen, 
+you must calculate the byte and bit to be changed in the pattern descriptor table. 
+The same offset will let you alter the color table.
+
+I don't know what processor the Coleco uses, 
+but here is a psuedo code for a weird and wacky formula that will calculate 
+the byte offset and bit offset of a given coordinate, 
+ready to be indexed into the appropriate table. :) 
+Note this is all 16-bit math. 
+Don't ask me why it works, but it does seem to. :)
+
+XIn = X coordinate 0-255
+YIn = Y coordinate 0-191
+ByteOut = Byte Offset into tables
+BitOut = Bit offset into byte in pattern descriptor table
+
+1. Copy YIn to ByteOut
+2. Shift ByteOut left 5 times (ie: multiply by 32)
+3. OR YIn into ByteOut
+4. AND ByteOut with >FF07
+5. Copy XIn to BitOut
+6. AND Bitout with >0007
+7. Add XIn to ByteOut
+8. Subtract BitOut from ByteOut
+
+;---------------------------------------------
+SPRITES
+;---------------------------------------------
+ 
+Sprites are independant of the screen and their patterns can be in addition 
+to those in the pattern descriptor table 
+(or the sprite descriptor table can be set up to overlap). 
+There can be up to 32 sprites and there are 4 available sizes.
+
+SPRITE ATTRIBUTE LIST
+
+This list defines the position and color of each of the 32 sprites, 0-31. 
+To move a sprite, you must update the entries in this table. 
+Sprites may be located at any visible position (0- 255 and 0-191), 
+or off the bottom of the screen (y> 191).
+
+Each definition is 4 bytes long, thus the table is 128 bytes long. 
+The first row on the screen is >FF, 
+the next is >00 and so on to >BE. (so it says!) :)
+
+Byte 1	- Y position of the sprite. 
+		>D0 means end ofthe sprite list, 
+		 so be aware if allowing sprites off the bottom.
+Byte 2	- X position of the sprite. 
+		>00 - >FF
+Byte 3	- pattern of the sprite, from 
+		>00 to >FF, in the SPRITE Descriptor Table
+Byte 4	Bits 0-2	= apparently undefined
+ 	Bit 3		= Early clock attribute - Normally, 
+			  the coordinates indicate the top left corner of the sprite, 
+			  and sprites can scroll smoothly off the right side of the screen. 
+			  If this bit is set, the early clock is enabled, 
+			  and the sprite is shifted 32 pixels to the left, 
+			  and scrolls smoothly off the left of the screen.
+ 	Bits 4-7	= Sprite color
+
+SPRITE DESCRIPTOR TABLE
+
+This table is defined exactly the same way as the pattern descriptor table in graphics mode. 
+However, sprites can be double-sized or magnified. 
+A magnified sprite simply has each pixel twice it's normal size. 
+A double-size sprite uses four consecutive characters, laid out like this:
+
+1 3
+2 4
+
+Sprites thus range from 8x8 pixels to 32x32 pixels, but only 16x16 pixels of detail.
+
+;---------------------------------------------
+Colors:
+;---------------------------------------------
+
+This table contains the foreground and background colors of all the characters. 
+The high nibble is the foreground color, 
+and the low nibble is the background color. 
+Each byte represents a group of 8 characters 
+(ie: the first entry is for characters 0-7, 
+the second for characters 8-15, etc). 
+The table is 32 bytes long.
+
+The colors are: (in hex)
+0 = Transparent
+1 = Black
+2 = Medium Green
+3 = Light Green
+4 = Dark Blue
+5 = Light Blue
+6 = Dark Red
+7 = Cyan
+8 = Medium Red
+9 = Light Red
+A = Dark Yellow
+B = Light Yellow
+C = Dark Green
+D = Magenta
+E = Gray
+F = White
+
+;---------------------------------------------
+; CARTRIDGE HEADER
+;---------------------------------------------
+
+$8000 : CARTRIDGE
+       game type = bytes AA 55 , display CV logo title screen
+       test type = bytes 55 AA , execute your game no delay
+       otherwise it is invalid and display "INSERT CARTRIDGE"
+
+$8002 : LOCAL_SPR_TBL
+       it is the memory address where is your sprites table
+       for their coordinates, patterns and colors.
+
+$8004 : SPRITE_ORDER
+       it is a table of usually maximum 32 bytes
+       that simply say in which order each sprite entry
+       should display. The corresponding initialisation function
+       set the values as 0,1,2,3,4... which mean that the first
+       entry (entry 0) is first, then the second entry (entry 1)
+       is second to be disaplayed. By reordering these numbers, you
+       affect the order of sprites, allowing to do flickering if needed.
+
+$8006 : WORK_BUFFER
+       it is usually a big memory RAM space that can be used by
+       some BIOS functions to calculate graphics manipulations
+       like mobile and semi-mobile objects, tiles rotations, etc.
+
+$8008 : CONTROLLER_MAP
+       it contains first 2 bytes telling if port-1 and port-2 are
+       enabled to be analyzed with the POLLER function. The following
+       values correspond to different fire buttons, stick direction,
+       keypad and spinner values.
+
+$800A : START_GAME
+       it is the address of the starting point of you code, your main code entry.
+
+$800C - $801D :
+       Are usually jumps to sub-programs in the cartridge or to BIOS functions.  
+
+$800C : RST_08H_RAM
+$800F : RST_10H_RAM
+$8012 : RST_18H_RAM
+$8015 : RST_20H_RAM
+$8018 : RST_28H_RAM
+$801B : RST_30H_RAM
+
+$801E : IRQ_INT_VECT
+       It should be a jump to a sub-routine saving all the PAIRs
+       (AF, BC, DE, HL, AF', BC' DE' and HL') and then jump to BIOS
+       to count spinner value $1F88 -or- something similar made by
+       the programmer. To avoid an interuption within an interuption
+       it is highly recommanded to use DI and EI opcodes to encapsulate
+       this part of the code. "IM 1" should be done as soon as possible
+       in game program, like the first thing at the main game entry point.
+
+$8021 : NMI_INT_VECT
+       It is the crucial part of all ColecoVision games. If you are not
+       using the CV logo screen, you can directly code your sequence
+       of actions to do while a non maskable interrupt (NMI) occurs.
+       To be safe, you should save all the regsiter PAIRs before
+       executing anything in the NMI function.
+       And most important, you should read the video status
+       Otherwise there will be no other non maskable interupt.
+
+$8024 : GAME_NAME
+       It is a string that contains first the name of the game
+       with usually the trademark symbol (characters 1E and 1F),
+       a slash as a separator, then the usual PRESENTS with  the original licensor,
+       a slash separator again, and finally the release year in 4 digits.
+
+;---------------------------------------------
+; ROUTINES
+;---------------------------------------------
+
+; Setup Screen 2,2 - Interrupts are disabled
+
+Reg	Coleco	MSX
+---------------------------------------------------------------------------------
+0	 2		; Reg 0: Mode 2
+2	 6		; Name table 1800h 		(  6 x $400 = $1800)
+3	ff		; Colour table 2000h 		($ff x $040 = $3fc0)
+4	 3		; Pattern table 0000h 		(  3 x $800 = $1800)
+5	36		; Sprite attribute table 1b00h 	($36 x $080 = $1b00)
+6	 7		; Sprite pattern table 3800h 	(  7 x $800 = $3800)
+7	 0		; Base colours,
+1	c2		; Reg 1: Mode 2, 16k, no interrupts, 16x16 sprites
+
+Coleco			MSX		Size		Description
+--------------------------------------------------------------------------------------------------------------------------------
+$0000-$17ff		$0000-$17ff	  3 x 256 x 8	char set			(6144 Bytes)	PATTERN GENERATOR TABLE
+$1800-$1aff		$1800-$1aff	 32 x  24	screen chars			( 768 Bytes)	PATTERN NAME TABLE
+$1b00-$1b7f		$1b00-$1b7f	 32 x   4 	sprite attr (Y,X,Nr,Col)	( 128 Bytes)	SPRITE ATTRIBUTE TABLE
+			$1b80-$1fff			????
+$2000-$37ff		$2000-$37ff	  3 x 256 x 8	char colour			(6144 Bytes)	PATTERN COLOUR TABLE
+$3800-$3fff		$3800-#3fff	256 x   8	sprite pattern data 		(2048 Bytes)	SPRITE GENERATOR TABLE
+
+SETSCREEN2:
+    LD BC,0002h				; Reg 0: Mode 2
+    CALL WRITE_REGISTER			; $1FD9
+    LD BC,0206h        			; Name table 1800h (6 x $400 = $1800)
+    CALL WRITE_REGISTER
+    LD BC,03ffh        			; Colour table 2000h ($ff x $40 = $3fc0)
+    CALL WRITE_REGISTER
+    LD BC,0403h        			; Pattern table 0000h (3 x $800 = $1800)
+    CALL WRITE_REGISTER
+    LD BC,0536h        			; Sprite attribute table 1b00h ($36 x $80 = $1b00)
+    CALL WRITE_REGISTER
+    LD BC,0607h        			; Sprite pattern table 3800h (7 x $800 = $3800)
+    CALL WRITE_REGISTER	
+    LD BC,0700h        			; Base colours, 
+					;	low nibble  = color0 text mode 
+					;	high nibble = color1 text mode 
+    CALL WRITE_REGISTER
+    LD BC,01c2h				; Reg 1: Mode 2, 16k, no interrupts, 16x16 sprites
+					; 1100.0010
+    CALL WRITE_REGISTER
+    RET
+
+;---------------------------------------------
+
+; Load the character set, make all three sections the same
+;	Charset1 = $0000-$07ff
+;	Charset2 = $0800-$0fff
+;	Charset3 = $1000-$17ff
+
+LOAD_CHR_SET:
+    LD HL,0				; VRAM_PATTERN: EQU $0000
+SLOOP:
+    LD DE,TILESET_1_PAT			; 256 x 8 data
+    PUSH HL				; HL = $0000
+    LD BC,PATSIZE*8			;  71 x 8
+    CALL LDIRVM				; Load a block of memory to VRAM
+					; HL = VRAM Address
+					; DE = RAM Address
+					; BC = Length
+    POP HL
+
+    ; now load colour attributes
+    PUSH HL
+    LD BC,VRAM_COLOR			; VRAM_COLOR: EQU $2000
+    ADD HL,BC				; HL = $2000
+    LD DE,TILESET_1_COL
+    LD BC,PATSIZE*8
+    CALL LDIRVM
+    POP HL
+
+    LD BC,800h				; Repeat for 3 charsets
+    ADD HL,BC
+    LD A,H
+    CP 18h
+    JR C,SLOOP
+    RET
+
+;-----------------------------------------------------------------------------------------
+
+Start:
+	- Set stack pointer
+	- Initialise sound
+	- Set screen mode
+	- Enable joysticks, buttons, keypads
+	- Seed random nrs
+	- Enable timers
+
+Titlescreen:
+	- Disable NMI
+	- Clear screen
+	- CALL LOAD_CHR_SET
+	- Setup title screen layout
+	- Clear joystick buffer
+
+Ngame:
+	- Disable NMI
+	- CALL INITRAM
+	- Send spritedata to VDP
+
+Mainscreen:
+	- Read joysticks to clear any false reads
+	- Initial Seed random with the time that has passed
+	- Disable interrupts
+	- Clean up in case the game left anything on screen
+	- Now setup the main screen layout
+	- Set position of player ship
+
+Mloop:
+	- Check that a base tick has occurred
+	- Ensures consistent movement speed between 50 & 60Hz systems
+	- Jump Mloop
+
+
+;-----------------------------------------------------------------------------------------
+; VDP TMS9918
+;-----------------------------------------------------------------------------------------
+
+; VRAM DEFAULT TABLES
+VRAM_PATGEN:        EQU $0000	(this tells us how each 8x8 character looks)
+				3x 256x8
+VRAM_NAME:          EQU $1800	(this tells us what is in the background)
+				32x24
+VRAM_SPRATTR:       EQU $1B00	(this tells us where sprites are, what they will look like, their color, and how many to display)
+				32x4
+		    EQU $1B80	(palette table)
+	
+VRAM_COLOR:         EQU $2000	(this tells us what colors to use for a given 8x8 pattern)
+				3x 256x8
+VRAM_SPRGEN:        EQU $3800	(this defines the 8x8 or 16x16 pattern for a sprite)
+				256x8
+
+There are five different tables:
+
+- Image Table – Defines the background tile map, which selects a character 
+  out of the pattern table for each cell on the screen.
+- Pattern Table – Defines an 8x8 (or 6x8 in Text mode) bitmap for each character.
+- Color Table – Varies between graphics modes, but generally chooses colors 
+  for either characters or regions of the screen.
+- Sprite Attribute Table – Defines position, bitmap, and color for each of the
+  32 possible sprites.
+- Sprite Pattern Table – Defines a 16x16 bitmap for each sprite, 
+  with 64 bitmaps in each table. There is also an 8x8 sprite mode with 256 bitmaps.
+
+Image Table		$400		Background tile map
+Pattern Table		$800 / $2000	Character bitmaps
+Color Table		$40 / $2000	Background color map
+Sprite Attribute Table	$80		Sprite positions and attributes
+Sprite Pattern Table	$800		Sprite bitmaps
+
+

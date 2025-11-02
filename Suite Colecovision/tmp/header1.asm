@@ -4,7 +4,7 @@
 
 ; Define cartridge header
 
-	db $aa,$55		; Cartridge type
+	db $55,$aa		; Cartridge type
 	dw $0000		; LOCAL_SPR_TBL
 	dw $0000		; SPRITE_ORDER
 	dw $0000		; WORK_BUFFER

@@ -1,3 +1,26 @@
+Hardware:
+
+	5432 10
+	1111 1198 7654 3210
+	xxxx xxxx GCBx xxxx	$e0-$ff I/O address sound chip
+		  1
+A  = WR NOT (L)
+G2 = IO NOT (L)
+
+74LS138
+	G1 G2 	C  B  A  	Y0 Y1 Y2 Y3 Y4 Y5 Y6 Y7
+	x  H  	x  x  x  	H  H  H  H  H  H  H  H
+	L  X  	x  x  x  	H  H  H  H  H  H  H  H
+	H  L  	L  L  L  	L  H  H  H  H  H  H  H
+	H  L  	L  L  H  	H  L  H  H  H  H  H  H
+	H  L  	L  H  L  	H  H  L  H  H  H  H  H
+	H  L  	L  H  H  	H  H  H  L  H  H  H  H
+	H  L  	H  L  L  	H  H  H  H  L  H  H  H
+	H  L  	H  L  H  	H  H  H  H  H  L  H  H
+WE NOT->H  L  	H  H  L  	H  H  H  H  H  H  L  H
+	H  L 	H  H  H  	H  H  H  H  H  H  H  L
+
+
 BBC:		FE40-FE4F
 Colecovision:	E0-FF
 

@@ -1,0 +1,12 @@
+Type	MSX		Colecovision
+ROM	4000-7FFF	8000-FFFF	
+RAM	8000-BFFF	2000-7FFF
+	E000-FFFF
+
+VRAM:
+0000-17ff,  32 x  24 x 8  $1800	screen pattern
+1800-1aff,   3 x 256      $0300	tiles top.middle,bottom
+1b00-1b7f,  32 x   4      $0080	sprite y,x,nr,color
+2000-37ff,  32 x  24 x 8  $1800	screen color
+3800-39ff,  32 x  16      $0200	sprite data
+3a00-3fff

@@ -1603,7 +1603,7 @@ IF G = 0
                     LET D = 1
                     LET K = 1
                     LET IMAGE = 1
-                    SOUND 0
+                    BEEP 20   ;SOUND 0
                 ENDIF
             ENDIF
         ENDIF
@@ -1620,7 +1620,7 @@ IF G = 0
                     LET D = 2
                     LET K = 1
                     LET IMAGE = 3
-                    SOUND 0
+                    BEEP 20   ;SOUND 0
                 ENDIF
             ENDIF
         ENDIF
@@ -2117,7 +2117,7 @@ SPRITEINK 3
 IF COLLISION PLAYER
     SPRITEINK 7
     EXPLODE 4
-    SOUND 3
+    BEEP 80; SOUND 3
     ADD 1 TO F
 ENDIF
 IF F = 48
@@ -2413,7 +2413,7 @@ EVENT GAMEINIT
 
 LET LIVES = 3
 INK 15
-PAPER 8
+PAPER 1
 BORDER 0
 CLS
 LET A = 24

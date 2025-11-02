@@ -158,9 +158,13 @@ VAPTIM	equ 10				; vapour particle life time
 ; contended RAM, leaving the code and rest of the game in uncontended memory at 32768 and beyond.
 
 start:
-;	if DISTYPE=ROM
+	if DISTYPE=ROM
 		di
-		ld sp,CV_STACK
+		ld sp,MSX_STACK
+	endif
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
 ;	else
 ; 		ld hl,(MSX_HIMEM)
 ;		ld sp,hl
@@ -172,6 +176,8 @@ start:
 ;		ld (MSX_SCNCNT),a
 ;		ld (MSX_INTCNT),a		
 ;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
 		; initialize vars
 		ld hl,varbegin
 		ld de,varbegin+1
@@ -179,9 +185,8 @@ start:
 		ld (hl),0
 		ldir
 
-	ld a,1
-	ld (contrl),a
-
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
 ;		;init mapper
 ;		ld	a,1
 ;		out	(MSX_MMAP2),a
@@ -245,14 +250,24 @@ start:
 ;		call setticks
 ;
 ;.common:		
+;	if (DISTYPE=ROM and DISSIZE!=48)
+;		ld a,(MSX_CHGCPU)
+;		cp $C3
+;		ld a,$81
+;		call z,MSX_CHGCPU		; if turbo available, set it
+;	endif
+;
 ;		; Set up the display if needed
 ;	if QFLAG=0
-;	
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
 		ld hl,$0101
 		ld (MSX_FORCLR+1),hl    ; sets background & border colour to black
-
  
-		call CV_INIGRP		; set display to screen 2
+		call MSX_INIGRP		; set display to screen 2
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
 
 ;Enable both joysticks, buttons, keypads
 
@@ -260,18 +275,27 @@ start:
 		ld (CONTROLLER_BUFFER),hl
 		xor a
 		call CONTROLLER_INIT    
-		
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+; Default control joystick1
+
+		ld a,1		
+		ld (contrl),a
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
 ;		ld a,(MSX_RG1SAV)
 ;		or 2
 ;		ld b,a
 ;		ld c,1
-;		call MSX_WRTVDP			; enable 16x16 sprites
-;
+;		call MSX_WRTVDP		; enable 16x16 sprites
 ;		xor a
 ;		ld (MSX_CLIKSW),a       ; disables keyboard click
-
+;
 ;	endif
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
 		
 		ld a,$F1
 		ld (clratt),a
@@ -283,13 +307,17 @@ start:
 		call sfx_init
 	endif
 	
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
 ;		; installs ISR
 ;		di
 ;		ld hl,isr
 ;		ld (MSX_HTIMI+1),hl
 ;		ld a,$C3
 ;		ld (MSX_HTIMI),a
-		ei
+;		ei
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
 
 	; When ROM, setup of variables with starting value
 	if DISTYPE=ROM
@@ -300,15 +328,15 @@ start:
 		ld (hl),a
 	endif
 		; ROM mode needs to initialize some vars
-		ld hl,score         ; scores.		
-		ld de,score+1       ; next byte.
-		ld bc,17			; size of score vars.
+		ld hl,score		; scores.		
+		ld de,score+1		; next byte.
+		ld bc,17		; size of score vars.
 		ld (hl),'0'        	; write '0'
 		ldir
 		ld hl,displ0+3
 		ld (hl),13+128
 	if SFLAG
-		inc a				; A=1
+		inc a			; A=1
 		ld (scrlyoff),a		; by default, no scrolltext
 	endif
 	if PFLAG
@@ -425,7 +453,6 @@ start:
 	endif
 		jp game             ; start the game.
 
-
 numob  db NUMOBJ         ; number of objects in game.
 
 ; Variables start here.
@@ -436,7 +463,6 @@ wnlftx db (8 * WINDOWLFT)
 wnbotx db ((WINDOWTOP * 8) + (WINDOWHGT * 8) - 16)
 wnrgtx db ((WINDOWLFT * 8) + (WINDOWWID * 8) - 16)
 
-
 ; Make sure pointers are arranged in the same order as the data itself.
 
 frmptr dw frmlst         ; sprite frames.
@@ -444,7 +470,6 @@ blkptr dw chgfx          ; block graphics.
 proptr dw bprop          ; address of char properties.
 scrptr dw scdat          ; address of screens.
 nmeptr dw nmedat         ; enemy start positions.
-
 
 	if MFLAG
 	
@@ -651,10 +676,6 @@ dbox12:
 		and 28              ; anything pressed?
 		jr z,dbox12         ; no, nothing.
 		and 16              ; fire button pressed?
-;mod1:						 ; auto-modifying code
-;		jp nz,fstd          ; yes, job done.
-
-		
 		jp nz,mod1
 		call dbar           ; delete bar.
 		ld a,(joyval)       ; joystick reading.
@@ -723,6 +744,7 @@ dbar:
 		ld c,a
 		ld b,0
 		call MSX_RDVRM
+
 		rlca
 		rlca
 		rlca
@@ -773,75 +795,82 @@ fobj:
 
 	endif
 
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
 ;
 ; ISR
 ;
-isr:
-	ifdef NOBIOS
-		push hl
-		push de
-		push bc
-		push af
-		exx
-		ex af,af
-		push hl
-		push de
-		push bc
-		push af
-		push iy
-		push ix
-        in a,($99)      ;Clear possible interrupt request
-        or a               ;Interrupt requested by VDP?		
-		jp p,.intret       ;No, skip the rest
-		ei
-	endif			
-        ld (MSX_STATFL),a	;Store this new status
-        ld hl,(MSX_JIFFY)
-        inc hl
-        ld (MSX_JIFFY),hl		
-	if (YFLAG or XFLAG)	
-		call psgrout
-		if YFLAG
-			call music_play
-		endif
-		if XFLAG
-			call sfx_play
-		endif
-	endif
-	ifdef NOBIOS
-.intret:
-	else
-		pop af
-	endif
-        pop ix              ;Restore all registers
-        pop iy
-        pop af
-        pop bc
-        pop de
-        pop hl
-        ex  af,af
-        exx
-        pop af
-        pop bc
-        pop de
-        pop hl
-        ei
-        ret					; returns from interrupt		
 ;
+;isr:
+;	ifdef NOBIOS
+;		push hl
+;		push de
+;		push bc
+;		push af
+;		exx
+;		ex af,af
+;		push hl
+;		push de
+;		push bc
+;		push af
+;		push iy
+;		push ix
+;       in a,($99)      ;Clear possible interrupt request
+;       or a               ;Interrupt requested by VDP?		
+;		jp p,.intret       ;No, skip the rest
+;		ei
+;	endif			
+;       ld (MSX_STATFL),a	;Store this new status
+;        ld hl,(MSX_JIFFY)
+;        inc hl
+;        ld (MSX_JIFFY),hl		
+;	if (YFLAG or XFLAG)	
+;		call psgrout
+;		if YFLAG
+;			call music_play
+;		endif
+;		if XFLAG
+;			call sfx_play
+;		endif
+;	endif
+;	ifdef NOBIOS
+;.intret:
+;	else
+;		pop af
+;	endif
+;        pop ix              ;Restore all registers
+;        pop iy
+;        pop af
+;        pop bc
+;        pop de
+;        pop hl
+;        ex  af,af
+;        exx
+;        pop af
+;        pop bc
+;        pop de
+;        pop hl
+;        ei
+;        ret					; returns from interrupt		
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
 ; Wait for keypress.
-;
+
 chkkey:
-;		call vsync
-;		ld b,11
-;.nokey:
-;		ld a,b
-;		dec a
+		call vsync
+		ld b,11
+.nokey:
+		ld a,b
+		dec a
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
 ;		call MSX_SNSMAT
-;		cp 255
-;		ret nz
-;		djnz .nokey
-;		jr chkkey
-		
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
+		cp 255
+		ret nz
+		djnz .nokey
+		jr chkkey
+
 prskey:
 	call vsync
 
@@ -987,6 +1016,9 @@ vsync:
 	if PFLAG
 		call proshr
 	endif
+	if EFLAG
+		call beeper
+	endif
 	call joykey
 
 ; Sync framerate to 25 Hz
@@ -1010,6 +1042,106 @@ check_if_enough_frames_passed:
 	pop af
 
 	ret
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; SN76489AN sound chip
+;
+; Registers:
+; 0 - Tone 1 frequency
+; 1 - Tone 1 attenuation
+; 2 - Tone 2 frequency
+; 3 - Tone 21 attenuation
+; 4 - Tone 3 frequency
+; 5 - Tone 3 attenuation
+; 6 - Noise control
+; 7 - Noise attenuation
+;
+; Update noise source:
+;  +-+---------+------------+ +-+ +---+----------------------+
+;  |   | Reg Addr |    Data     | |   |       Data           |
+;  +---+----------+-------------+ +---+----------------------+ 
+;  | 1 | R0 R1 R2 | F6 F7 F8 F9 | | 0 | F0 F1 F2 F3 F4 F5 F6 |
+;  +---+----------+-------------+ +---+----------------------+
+;
+; Update noise source:
+;  +---+----------+---+----+---------+	
+;  |   | Reg Addr |   |    | Shift   |
+;  +---+----------+---+----+---------+
+;  | 1 | R0 R1 R2 | x | FB | NF0 NF1 | 
+;  +---+----------+---+----+---------+ 
+;
+;  NF0 NF1 Shift rate			FB	Configuration
+;   0   0  N/512			0	Periodic noise
+;   0   1  N/1024			1	White noise
+;   1   0  N/2048
+;   1   1  Tone generator #3 Output
+;
+; Update attenuator:
+;  +---+----------+-------------+
+;  |   | Reg Addr |    Data     |
+;  +---+----------+-------------+ 
+;  | 1 | R0 R1 R2 | A0 A1 A2 A3 |
+;  +---+----------+-------------+
+
+beeper:
+	ld hl,sndtyp
+	ld a,(hl)
+	and a
+	jr z,sndskip
+
+	ld a,%10010000		; PSG channel 0 full volume
+	call psgWrite
+beepLoop:
+	ld hl,sndtyp
+	ld a,(hl)
+	rl a
+	and 3
+	rl a
+	rl a
+	or %10000000
+	call psgWrite
+	ld hl,sndtyp
+	ld a,(hl)
+	rr a
+	rr a
+	call psgWrite
+
+	ld hl,sndtyp
+	ld a,(hl)
+
+	ld b,a
+beepWait:
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	djnz beepWait
+
+	ld hl,sndtyp
+	ld a,(hl)
+	dec a
+	ld (hl),a
+	and a
+	jr nz,beepLoop
+
+	ld a,%10011111		; PSG channel 0 volume off
+	call psgWrite
+
+sndskip:
+	ret
+
+psgWrite:
+	out ($ff),a
+	ret
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ;		ld hl,MSX_JIFFY
 ;		ld a,(hl)
 ;
@@ -1118,7 +1250,6 @@ check_if_enough_frames_passed:
 ;
 ;	if EFLAG
 ;	
-beeper:
 ;	ifdef DEBUG
 ;		BORDER 15
 ;	endif
@@ -5865,11 +5996,11 @@ hiscor:		ds 6		; high score  000000 .
 bonus:		ds 6		; bonus  000000 .
 displ0:		ds 4
 
-	if EFLAG
+;	if EFLAG
 
 sndtyp:		ds 1		; sound type. don't move!
 
-	endif
+;	endif
 
 	if PFLAG
 
@@ -6013,6 +6144,7 @@ txtbeg:		ds 2			;
 ; beeper variable
 	if EFLAG
 snddelay:	ds 1
+beepVolume	ds 1
 	endif
 	
 spptr:		ds 2			; spawned sprite pointer.
@@ -6169,7 +6301,7 @@ eop:		equ $
 ;
 ; Extra binary. Loaders for disk/tape versions
 ;
-
+/*
 	if (DISTYPE!=ROM and DISSIZE>32)
 	
 		output loader.bin
@@ -6418,3 +6550,4 @@ endslots:	equ $
 		
 	endif
 
+*/

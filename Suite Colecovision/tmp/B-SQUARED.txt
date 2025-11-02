@@ -1,0 +1,17 @@
+-------------------------------------------------
+
+ Page: 00
+  Org: 00008000  Size: 00008000  Used: 000047B6
+
+   Address   Length Align   Label
+   00008000   18358     @   rst_8
+   0000C7B6   14410       <empty>
+
+ Output: ram_vars.tmp
+-------------------------------------------------
+
+ Page: 00
+  Org: 00000000  Size: *  Used: 00001006
+
+   Address   Length Align   Label
+   00000000    4102         score

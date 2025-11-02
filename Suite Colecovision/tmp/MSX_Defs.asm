@@ -153,7 +153,7 @@ MSX_SSSREG	equ	$5FFF	; secondary slot select register
 ; ================================================================
 
 ; Maximum stack address
-CV_STACK	equ $3000
+MSX_STACK	equ $3000
 
 ; I/O PORTS ================================================================
 MSX_DEVID	equ	$40
@@ -219,15 +219,15 @@ MSX_GTTRIG	equ	BIOS_GTTRIG
 MSX_ENASLT	equ $0024
 MSX_DISSCR	equ $0041
 MSX_ENASCR	equ $0044
-MSX_WRTVDP	equ $0047
-MSX_RDVRM	equ $004A
+MSX_WRTVDP	equ WRITE_REGISTER
+MSX_RDVRM	equ CV_RDVRM	; $004A
 MSX_WRTVRM	equ CV_WRTVRM	; $004D
 MSX_SETRD	equ $0050
 MSX_SETWRT	equ CV_SETWRT	; $0053
-MSX_FILVRM	equ $0056
+MSX_FILVRM	equ CV_FILVRM	; $0056
 MSX_LDIRMV	equ $0059
 MSX_LDIRVM	equ $005C
-MSX_INIGRP	equ $0072
+MSX_INIGRP	equ CV_INIGRP	; $0141
 MSX_CLS		equ CV_CLS	; $00C3
 MSX_GTSTCK	equ $00D5
 MSX_GTTRIG	equ $00D8
