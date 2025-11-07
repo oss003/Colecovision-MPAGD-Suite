@@ -156,7 +156,7 @@ MSX_SSSREG	equ	$5FFF	; secondary slot select register
 MSX_STACK	equ $3000
 
 ; I/O PORTS ================================================================
-MSX_DEVID	equ	$40
+MSX_DEVID	equ $40
 MSX_SWTIO	equ $41
 
 ; PSG PORTS
@@ -169,10 +169,10 @@ MSX_PSGPB	equ 15  ;Port B of PSG
 
 
 ; VDP PORTS
-MSX_VDPDRW	equ	$be	;98H    Read/write data VDP
-MSX_VDPCW	equ	$bf	;99H    write command to VDP
-MSX_VDPSR	equ	$bf	;99H    read status from VDP
-MSX_VDPPAL	equ	$9B     ; palette register (only MSX2)
+MSX_VDPDRW	equ $a0	; 98H    Read/write data VDP
+MSX_VDPCW	equ $a1	; 99H    write command to VDP
+MSX_VDPSR	equ $a1	; 99H    read status from VDP
+MSX_VDPPAL	equ $9B ; palette register (only MSX2)
 
 ; PPI / Programmable Peripheral Interface / 8255 I/O ports
 MSX_PPIA	equ $A8 ; PPI- register A. Primary slot select register

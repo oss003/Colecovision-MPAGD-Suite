@@ -1,27 +1,111 @@
 ;---------------------------------------------
-Memory map:
+Memory map MPAGD:
 ;---------------------------------------------
 
-0000H - 1FFFH	BIOS ROM
-2000H - 3FFFH	Expansion port
-	3000H	Stack downwards
-4000H - 5FFFH	Expansion port
-6000H - 7FFFH	Start of RAM (1K mapped into an 8K spot)
-8000H - FFFFH	Cart ROM (broken into 4 sections, each enabled seperately)
+4000-4005	   6	score
+4006-400b	   6	hiscore
+400c-4011	   6	bonus
+4012-4015	   4	disp10
+4016		   1	sndtyp
+		   2	shrplot
+		   1	scrlyoff
+4017-4019	   3	mod0
+401a-401c	   3	mod1
+401d-401f	   3	mod2
+4020-4040	  33	variables
+		  10	scrolling vars
+4041		   1	snddelay
+4042		   1	beepVolume
+4043-4044	   2	spptr
+4045		   1	seed
+4046-4047	   2	grbase
+4048		   1	joyval		
+4049		   1	scno
+404A-404b	   2	ogptr
+404C		   1	nsprite
+404D		   1	numlif
+404E		   1	curobj
+404F-4050	   2	dirthig	
+4051-4052	   2	skptr
+4053		   1	highslot
+4054		   1	roomtb
+4055		   1	bwid
+4056		   1	blen
+4057		   1	btop
+4058		   1	blft
+4059		   1	frmno
+405a		   1	combyt
+405b		   1	seed3
+405c		   1	nexliv
+405d		   1	restfl
+405e		   1	deadf
+405f		   1	gamwon
+4060		   1	dispx
+4061		   1	dispy
+4062		   1	varrnd
+4063		   1	varobj
+4064		   1	varopt
+4065		   1	varblk
+4066		   1	offset
+4067		   1	select
+4068		   1	ticks
+4069-41e7	 383	PT3 player
+41e8-41f2	  11	FX player
+41f3-41f4	   2	sprptr
+41f5-41f6	   2	stack
+41f7-41f8	   2	sprptr
+41f9		   1	time
+41fa-420f	  22	keys
+4210		   1	wintop
+4211		   1	winlft
+4212		   1	winhgt
+4213		   1	winwid
+4214-421f	  12	CONTROLLER_BUFFER
+4220-4230	  17	ssprit
+4231-4450	 544	sprtab
+4451-4600	 432	mapbuf
+4601-46ff		free
+4700-477f	 128	spratr2
+4780-47ff	 128	spratr
+4800-4aff	 768	MAP
+4b00-4bff	 256	objlist
+4c00-4eff	 768	scrmap
+4f00-4f7f	 128	mapspr
+4f80-4fbf	  64	colltab
+		 304	scrbuf		scrolling
+		 488	scrolling
+4fc0-4ffb	  60	objatr
+4ffc		   1	frames_passed
+4ffd		   1	NMIflag
+4ffe-4fff	   2	eop
+
+;---------------------------------------------
+Memory map Colecovision:
+;---------------------------------------------
+
+RAM-ROM:
+0000-1FFF	BIOS ROM
+2000-3FFF	Expansion port
+4000-5FFF	Expansion port
+6000-7FFF	Start of RAM (1K mapped into an 8K spot)
+8000-FFFF	Cart ROM (broken into 4 sections, each enabled seperately)
+
+VRAM:
+0000-17ff	6144	char set
+1800-1aff	 768	screen chars
+1b00-1b7f	 128	sprite attr (Y,X,Nr,Col)
+1b80-1fff	 128	free
+2000-37ff	6144	char colour
+3800-3fff	2048	sprite pattern data
 
 ;---------------------------------------------
 I/O:
 ;---------------------------------------------
 
-00-1F - No Connection
-20-3F - No Connection
-40-5F - Video
-60-7F - Video
-80-9F - No Connection
-A0-BF - No Connection
-C0-DF - Sound
-E0-FF - Controllers; E2 is special, as wellas E0
-	 - E0 appears to be the readback, and E2 appears to be the scan - 39
+80-8f	Controller 2
+a0-af	VDC 	
+c0-cf	Controller 1 
+e0-ef	Sound chip 
 
 ;---------------------------------------------
 VDU registers:

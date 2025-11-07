@@ -4496,6 +4496,9 @@ ram2vram:
         out (c),d
 		dec c 
 .loop:		
+	nop
+	nop
+	nop
 		[8] outi
 		jp nz,.loop
 		ret
