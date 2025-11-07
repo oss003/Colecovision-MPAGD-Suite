@@ -17,6 +17,7 @@ set SOURCES=%WD%\AGDsources
 set TOOLSPATH=%WD%\tools
 set ASMPATH=%WD%\sjasm
 set MEDIAPATH=%WD%\resources
+set ROMPATH=%WD%\roms
 
 set WRDSK=%TOOLSPATH%\wrdsk.exe
 set MCP=%TOOLSPATH%\mcp.exe
@@ -77,6 +78,9 @@ echo.
 :getopt
 set OPT=%~1
 if "%OPT%"=="" (
+	set DIST=ROM
+	set HIMEM=%CASHIMEM%	
+	set MEMORY=32
 	goto endopt
 ) else if not "%OPT:~0,1%"=="-" (
 	set NAME=%OPT%
@@ -318,11 +322,11 @@ if "%NAME%"=="" (
 	goto help
 )
 if "%DFLAG%%RFLAG%%KFLAG%"=="" (
-	echo Setting default distribution to RAM, disk and 32K...
-	set DIST=RAM
+	echo Setting default distribution to ROM, 32K...
+	set DIST=ROM
 	set MEMORY=32
-	set HIMEM=%DSKHIMEM%
-	set DFLAG=-d !MEMORY!
+	set HIMEM=%CASHIMEM%
+	set DFLAG=-r !MEMORY!
 	set /a BSTART=32768 + BASSIZE
 	set /a SZLIMIT=HIMEM - STACK - BSTART
 	set /a MAXRAM=HIMEM - STACK - BIOSVARS
@@ -617,11 +621,10 @@ REM	del sjasm.log *.bin %NAME%.dsk >NUL 2>&1
 	) else (
 		set BSTART=32768
 	)
-
 	set /a BSIZE = BEND - BSTART
 	set /a VSTART = RAMSTART
 	set /a VEND = 16384 + DSIZE
-	set /a FREERAM = RAMSTART - DSIZE
+	set /a FREERAM = 16384 - DSIZE
 	call :DECTOHEX BSTART
 	call :DECTOHEX BEND
 	call :DECTOHEX VSTART
@@ -644,7 +647,7 @@ REM	del sjasm.log *.bin %NAME%.dsk >NUL 2>&1
 		REM if exist rom_filler.bin (
 		REM 	copy /b %NAME%.rom + rom_filler.bin %NAME%.rom >NUL 2>&1
 		REM )
-		move %NAME%.rom "%WD%" >NUL 2>&1
+		move %NAME%.rom "%ROMPATH%" >NUL 2>&1
 		move %NAME%.sym "%ASMPATH%" >NUL 2>&1
 	)
 
@@ -664,6 +667,7 @@ REM	del sjasm.log *.bin %NAME%.dsk >NUL 2>&1
 
 	echo Process finished^^!^^!
 	goto :eof
+	
 	
 :execemu
 	cd /d "%MSXEMUPATH%"
@@ -740,7 +744,7 @@ REM	del sjasm.log *.bin %NAME%.dsk >NUL 2>&1
 		) 
 	) 
 rem	start "" /B "%MSXEMUPATH%\%EMU%" !HW! !MEDIA!
-	start "" /B "%MSXEMUPATH%\%EMU%" ..\%name%.rom
+	start "" /B "%MSXEMUPATH%\%EMU%" "%ROMPATH%\%name%.rom"
 	exit /b 0
 	
 :createbin

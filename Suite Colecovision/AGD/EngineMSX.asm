@@ -303,11 +303,12 @@ start:
 	if YFLAG
 		call music_init
 	endif
-	if XFLAG
-		call sfx_init
-	endif
 	
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
+;	if XFLAG
+;		call sfx_init
+;	endif
 ;
 ;		; installs ISR
 ;		di
@@ -1012,13 +1013,17 @@ iniob:
 vsync:
 	push af
 	push hl
+
 	call buildspr
+
 	if PFLAG
 		call proshr
 	endif
+
 	if EFLAG
 		call beeper
 	endif
+
 	call joykey
 
 ; Sync framerate to 25 Hz
@@ -1027,12 +1032,6 @@ check_if_enough_frames_passed:
 	ld hl,time
 	ld a,(hl)
 	cp 1
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
 	jr c,check_if_enough_frames_passed
 
 	xor a			; sync framerate 25 Hz
@@ -6293,6 +6292,9 @@ biosvars:	ds $38
 	
 frames_passed:
 	db 0
+
+NMIflag:
+	db 1
 
 eop:		equ $
 

@@ -1,0 +1,882 @@
+Comparing files EngineMSX-v0710.asm and ENGINEMSX.ASM
+***** EngineMSX-v0710.asm
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Arcade Game Designer.
+***** ENGINEMSX.ASM
+
+; Arcade Game Designer.
+*****
+
+***** EngineMSX-v0710.asm
+; MSX version (C) jltursan
+; Based on ZX Spectrum Engine v0.7.4 - v0.7.10
+; Colecovision update by K.v.Oss 2025
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;
+***** ENGINEMSX.ASM
+; MSX version (C) jltursan
+; Based on ZX Spectrum Engine v0.7.4
+;
+*****
+
+***** EngineMSX-v0710.asm
+; * music_play => plays a music frame from the ISR. The idea is to set a buffer with all the PSG register ready to dump
+;                 but also must implement:
+; * music_loopoff
+***** ENGINEMSX.ASM
+; * music_play => plays a music frame from the ISR. The idea is to set a buffer with all the PSG register ready to dump
+; but also must implement:
+; * music_loopoff
+*****
+
+***** EngineMSX-v0710.asm
+; Added: New command SPRITESOFF
+; Added: New distribution type: CAS (tape). Needs external tool mcp by Apoloval (Thanks Apoloval!)
+; Fixed: RAM/ROM slot routines changed to a more compatible ones (Thanks JAM!)
+; Added: Support of forced 50hz/60hz TV freqs
+; Added: 50hz/60hz TV freqs swappable with hotkey (SELECT)
+; Added: New command THRUST
+; Added: LZ compression (Pletter) instead RLE for map screens (gains around 30% per screen)
+; Added: New command SCREENON
+***** ENGINEMSX.ASM
+; Added: New command SPRITESOFF
+; Fixed: RAM/ROM slot routines changed to a more compatible ones (Thanks JAM!)
+; Added: Support of forced PAL/NTSC TV modes
+; Added: PAL/NTSC modes swappable with hotkey (SELECT)
+; Added: New command THRUST
+; Added: LZ compression (Pletter) instead RLE for map screens
+; Added: New command SCREENON
+*****
+
+***** EngineMSX-v0710.asm
+; Added: New command SCREENOFF
+; Added: Full ayFX control: SFX priority, fixed channel selection & dynamic sfx channels
+; Added: New memory models: 64KB RAM and 48KB ROM (dsk & cas)
+
+***** ENGINEMSX.ASM
+; Added: New command SCREENOFF
+
+*****
+
+***** EngineMSX-v0710.asm
+;
+; Core routines
+; ----------------------------------
+***** ENGINEMSX.ASM
+;
+; Core rotuines
+; ----------------------------------
+*****
+
+***** EngineMSX-v0710.asm
+
+; TV freqs
+
+HZ50=50
+HZ60=60
+
+***** ENGINEMSX.ASM
+
+; TV modes
+
+PAL=1
+NTSC=2
+
+*****
+
+***** EngineMSX-v0710.asm
+; MSX machines characteristics
+
+MSX_MAXROWS     equ 24
+***** ENGINEMSX.ASM
+; MSX machines characteristics
+MSX_MAXROWS     equ 24
+*****
+
+***** EngineMSX-v0710.asm
+
+; =============================================================================================
+***** ENGINEMSX.ASM
+
+
+; =============================================================================================
+*****
+
+***** EngineMSX-v0710.asm
+        endif
+        
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;       include "MSX_Defs.asm"
+***** ENGINEMSX.ASM
+        endif
+
+;       include "MSX_Defs.asm"
+*****
+
+***** EngineMSX-v0710.asm
+;       include "MSX_Macros.asm"
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+; Game starts here.  No reason why screen data couldn't go between start and contrl to put them in
+***** ENGINEMSX.ASM
+;       include "MSX_Macros.asm"
+
+; Game starts here.  No reason why screen data couldn't go between start and contrl to put them in
+*****
+
+***** EngineMSX-v0710.asm
+start:
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;       if DISTYPE=ROM
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                di
+***** ENGINEMSX.ASM
+start:
+        if DISTYPE=ROM
+                di
+*****
+
+***** EngineMSX-v0710.asm
+                ld sp,MSX_STACK
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;       else
+***** ENGINEMSX.ASM
+                ld sp,MSX_STACK
+        endif
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
+;       else
+*****
+
+***** EngineMSX-v0710.asm
+;               ld (MSX_INTCNT),a               
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+***** ENGINEMSX.ASM
+;               ld (MSX_INTCNT),a               
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
+*****
+
+***** EngineMSX-v0710.asm
+                ldir
+                
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;       ;init mapper
+;               ld      a,1
+***** ENGINEMSX.ASM
+                ldir
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
+;               ;init mapper
+;               ld      a,1
+*****
+
+***** EngineMSX-v0710.asm
+;                       ld hl,MSX_RG9SAV
+;                       if (TVFREQ=HZ50)
+;                               res 1,(hl)
+***** ENGINEMSX.ASM
+;                       ld hl,MSX_RG9SAV
+;                       if (TVFREQ=PAL)
+;                               res 1,(hl)
+*****
+
+***** EngineMSX-v0710.asm
+;
+;.common:
+;       if (DISTYPE=ROM and DISSIZE!=48)
+***** ENGINEMSX.ASM
+;
+;.common:               
+;       if (DISTYPE=ROM and DISSIZE!=48)
+*****
+
+***** EngineMSX-v0710.asm
+;       endif
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                ; Set up the display if needed
+        if QFLAG=0
+        
+                ld hl,$0101
+***** ENGINEMSX.ASM
+;       endif
+;
+;               ; Set up the display if needed
+;       if QFLAG=0
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
+                ld hl,$0101
+*****
+
+***** EngineMSX-v0710.asm
+                ld (MSX_FORCLR+1),hl    ; sets background & border colour to black
+
+                call MSX_INIGRP         ; set display to screen 2
+                
+                ld a,(MSX_RG1SAV)
+                or 2
+                ld b,a
+                ld c,1
+                call MSX_WRTVDP                 ; enable 16x16 sprites
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;               ifndef NOBIOS
+;                       xor a
+;                       ld (MSX_CLIKSW),a       ; disables keyboard click
+;               endif
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        endif
+                
+***** ENGINEMSX.ASM
+                ld (MSX_FORCLR+1),hl    ; sets background & border colour to black
+ 
+                call MSX_INIGRP         ; set display to screen 2
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+
+;Enable both joysticks, buttons, keypads
+
+                ld hl,$9b9b
+                ld (CONTROLLER_BUFFER),hl
+                xor a
+                call CONTROLLER_INIT    
+
+; Default control joystick1
+
+                ld a,1          
+                ld (contrl),a
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
+;               ld a,(MSX_RG1SAV)
+;               or 2
+;               ld b,a
+;               ld c,1
+;               call MSX_WRTVDP         ; enable 16x16 sprites
+;               xor a
+;               ld (MSX_CLIKSW),a       ; disables keyboard click
+;
+;       endif
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+                
+*****
+
+***** EngineMSX-v0710.asm
+        
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; The MSX has an IRQ line but the Colecovision has NMI
+; So NMI has to set to isr
+;
+***** ENGINEMSX.ASM
+        
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
+*****
+
+***** EngineMSX-v0710.asm
+;               ei
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+***** ENGINEMSX.ASM
+;               ei
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
+*****
+
+***** EngineMSX-v0710.asm
+                ; ROM mode needs to initialize some vars
+                ld hl,score         ; scores.           
+                ld de,score+1       ; next byte.
+                ld bc,17                        ; size of score vars.
+                ld (hl),'0'             ; write '0'
+***** ENGINEMSX.ASM
+                ; ROM mode needs to initialize some vars
+                ld hl,score             ; scores.               
+                ld de,score+1           ; next byte.
+                ld bc,17                ; size of score vars.
+                ld (hl),'0'             ; write '0'
+*****
+
+***** EngineMSX-v0710.asm
+        if SFLAG
+                inc a                           ; A=1
+                ld (scrlyoff),a         ; by default, no scrolltext
+***** ENGINEMSX.ASM
+        if SFLAG
+                inc a                   ; A=1
+                ld (scrlyoff),a         ; by default, no scrolltext
+*****
+
+***** EngineMSX-v0710.asm
+        if MFLAG
+                ld a,$C3                ; jp instruction
+                ld (mod0),a
+***** ENGINEMSX.ASM
+        if MFLAG
+                ld a,$C3
+                ld (mod0),a
+*****
+
+***** EngineMSX-v0710.asm
+        endif
+                ld hl,keytab            ; Every key is 16 bits
+                ld de,keys
+***** ENGINEMSX.ASM
+        endif
+                ld hl,keytab
+                ld de,keys
+*****
+
+***** EngineMSX-v0710.asm
+        endif
+
+                jp game             ; start the game.
+***** ENGINEMSX.ASM
+        endif
+                jp game             ; start the game.
+*****
+
+***** EngineMSX-v0710.asm
+                and 16              ; fire button pressed?
+;mod1:                                           ; auto-modifying code
+;               jp nz,fstd          ; yes, job done.
+
+                
+                jp nz,mod1
+***** ENGINEMSX.ASM
+                and 16              ; fire button pressed?
+                jp nz,mod1
+*****
+
+***** EngineMSX-v0710.asm
+                ld b,0
+                call MSX_RDVRM          ; Call CV_BIOS
+                rlca
+***** ENGINEMSX.ASM
+                ld b,0
+                call MSX_RDVRM
+
+                rlca
+*****
+
+***** EngineMSX-v0710.asm
+                rlca
+                jp MSX_FILVRM           ; Call CV_BIOS
+
+***** ENGINEMSX.ASM
+                rlca
+                jp MSX_FILVRM
+
+*****
+
+***** EngineMSX-v0710.asm
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;
+; ISR, has to be modified to the Colecovions NMI at 50 Hz
+;
+isr:
+        ifdef NOBIOS
+                push hl
+                push de
+                push bc
+                push af
+                exx
+                ex af,af
+                push hl
+                push de
+                push bc
+                push af
+                push iy
+                push ix
+ 
+                in a,($99)      ;Clear possible interrupt request
+                or a            ;Interrupt requested by VDP?            
+                jp p,.intret    ;No, skip the rest
+                ei
+        endif                   
+                ld (MSX_STATFL),a       ;Store this new status
+                ld hl,(MSX_JIFFY)
+                inc hl
+                ld (MSX_JIFFY),hl               
+                if (YFLAG or XFLAG)     
+                        call psgrout
+                        if YFLAG
+                                call music_play
+                        endif
+                        if XFLAG
+                                call sfx_play
+                        endif
+                endif
+
+        ifdef NOBIOS
+.intret:
+        else
+                pop af
+        endif
+                pop ix                  ;Restore all registers
+                pop iy
+                pop af
+                pop bc
+                pop de
+                pop hl
+                ex  af,af
+                exx
+                pop af
+                pop bc
+                pop de
+                pop hl
+                ei
+                ret                     ; returns from interrupt                
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+;
+; Wait for keypress.
+;
+chkkey:
+***** ENGINEMSX.ASM
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;
+; ISR
+;
+;
+;isr:
+;       ifdef NOBIOS
+;               push hl
+;               push de
+;               push bc
+;               push af
+;               exx
+;               ex af,af
+;               push hl
+;               push de
+;               push bc
+;               push af
+;               push iy
+;               push ix
+;       in a,($99)      ;Clear possible interrupt request
+;       or a               ;Interrupt requested by VDP?         
+;               jp p,.intret       ;No, skip the rest
+;               ei
+;       endif                   
+;       ld (MSX_STATFL),a       ;Store this new status
+;        ld hl,(MSX_JIFFY)
+;        inc hl
+;        ld (MSX_JIFFY),hl              
+;       if (YFLAG or XFLAG)     
+;               call psgrout
+;               if YFLAG
+;                       call music_play
+;               endif
+;               if XFLAG
+;                       call sfx_play
+;               endif
+;       endif
+;       ifdef NOBIOS
+;.intret:
+;       else
+;               pop af
+;       endif
+;        pop ix              ;Restore all registers
+;        pop iy
+;        pop af
+;        pop bc
+;        pop de
+;        pop hl
+;        ex  af,af
+;        exx
+;        pop af
+;        pop bc
+;        pop de
+;        pop hl
+;        ei
+;        ret                                    ; returns from interrupt                
+;
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
+; Wait for keypress.
+
+chkkey:
+*****
+
+***** EngineMSX-v0710.asm
+                dec a
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                call MSX_SNSMAT ; No key pressed returns 255
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                cp 255
+***** ENGINEMSX.ASM
+                dec a
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch start~~
+;               call MSX_SNSMAT
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Colecovision patch end~~
+
+                cp 255
+*****
+
+***** EngineMSX-v0710.asm
+                jr chkkey
+                
+prskey:
+                call debkey
+                call chkkey
+                
+; Debounce keypress.
+***** ENGINEMSX.ASM
+                jr chkkey
+
+prskey:
+        call vsync
+
+        ld a,(CONTROLLER_BUFFER+2)      ; Test button left
+        and a
+        jr nz,debkey
+
+        ld a,(CONTROLLER_BUFFER+3)      ; Test joystick
+        and a
+        jr nz,debkey
+
+        ld a,(CONTROLLER_BUFFER+6)      ; Test keypad
+        cp $0f
+        jr nz,debkey
+
+        ld a,(CONTROLLER_BUFFER+5)      ; Test button right
+        and a
+        jr nz,debkey
+
+        jp prskey
+
+; Debounce keypress.
+*****
+
+***** EngineMSX-v0710.asm
+debkey:
+                call vsync
+                ld b,11
+.nokey:
+                ld a,b
+                dec a
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                call MSX_SNSMAT ; No key pressed returns 255
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                cp 255
+                jr nz,debkey    
+                djnz .nokey
+                ret
+
+***** ENGINEMSX.ASM
+debkey:
+        call vsync
+
+        ld a,(CONTROLLER_BUFFER+2)      ; Test button left
+        and a
+        jr nz,debkey
+
+        ld a,(CONTROLLER_BUFFER+3)      ; Test joystick
+        and a
+        jr nz,debkey
+
+        ld a,(CONTROLLER_BUFFER+6)      ; Test keypad
+        cp $0f
+        jr nz,debkey
+
+        ld a,(CONTROLLER_BUFFER+5)      ; Test button right
+        and a
+        jr nz,debkey
+
+        ret
+
+*****
+
+***** EngineMSX-v0710.asm
+iniob:
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+;               /*
+;               ld ix,objdta        ; objects table.
+;               ld a,(numob)        ; number of objects in the game.
+;               ld b,a              ; loop counter.
+;               ld de,OBJSIZ        ; distance between objects.
+;.loop:
+;               ld a,(ix+67)        ; start screen.
+;               ld (ix+64),a        ; set start screen.
+;               ld a,(ix+68)        ; find start x.
+;               ld (ix+65),a        ; set start x.
+;               ld a,(ix+69)        ; get initial y.
+;               ld (ix+66),a        ; set y coord.
+;               add ix,de           ; point to next object.
+;               djnz .loop         ; repeat.
+;               ret
+;               */
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                ld a,(numob)        ; number of objects in the game.
+***** ENGINEMSX.ASM
+iniob:
+                /*
+                ld ix,objdta        ; objects table.
+                ld a,(numob)        ; number of objects in the game.
+                ld b,a              ; loop counter.
+                ld de,OBJSIZ        ; distance between objects.
+.loop:
+                ld a,(ix+67)        ; start screen.
+                ld (ix+64),a        ; set start screen.
+                ld a,(ix+68)        ; find start x.
+                ld (ix+65),a        ; set start x.
+                ld a,(ix+69)        ; get initial y.
+                ld (ix+66),a        ; set y coord.
+                add ix,de           ; point to next object.
+                djnz .loop         ; repeat.
+                ret
+                */
+                ld a,(numob)        ; number of objects in the game.
+*****
+
+***** EngineMSX-v0710.asm
+vsync:
+                ld hl,MSX_JIFFY
+                ld a,(hl)
+
+        if SFLAG
+                push af
+                push hl
+                call scrltxt
+                pop hl
+                pop af
+                cp (hl)
+                jr z,.novbl0
+                call scrly
+        if PFLAG
+***** ENGINEMSX.ASM
+vsync:
+        push af
+        push hl
+        call buildspr
+        if PFLAG
+*****
+
+***** EngineMSX-v0710.asm
+        endif
+                call buildspr
+        if EFLAG
+***** ENGINEMSX.ASM
+        endif
+        if EFLAG
+*****
+
+Resync Failed.  Files are too different.
+***** EngineMSX-v0710.asm
+        endif
+                call joykey
+                jr .nowait
+                
+.novbl0:                
+        endif
+
+        if PFLAG
+                
+                push af
+                push hl
+                call proshr
+                pop hl
+                pop af
+                cp (hl)
+                jr z,.novbl1
+        if SFLAG
+                call scrly
+        endif
+                call buildspr
+        if EFLAG
+                call beeper
+        endif
+                call joykey
+                jr .nowait
+                
+.novbl1:                
+        endif
+                
+                push af
+                push hl
+                call buildspr
+                pop hl
+                pop af
+                cp (hl)
+                jr z,.novbl2
+        if SFLAG
+                call scrly
+        endif
+        if EFLAG
+                call beeper
+        endif
+                call joykey
+                jr .nowait
+
+.novbl2:
+        if EFLAG
+                call beeper
+        endif
+                cp (hl)
+                jr z,.novbl3
+        if SFLAG
+                call scrly
+        endif
+                call joykey
+                jr .nowait
+                
+.novbl3:
+                push af
+                push hl
+                call joykey
+                pop hl
+                pop af
+                cp (hl)
+                ; jr z,.novbl5
+                jr z,.wait
+        if SFLAG
+                call scrly
+        endif
+                jr .nowait
+                
+.wait:          
+        ifdef DEBUG
+                BORDER 13
+        endif
+                cp (hl)
+                jr z,.wait
+        if SFLAG
+                call scrly
+        endif
+        
+.nowait:
+        ifdef DEBUG
+                BORDER 14
+        endif
+                ret
+
+        if EFLAG
+        
+beeper:
+        ifdef DEBUG
+                BORDER 15
+        endif
+                ld e,a                          ; keeps JIFFY
+                ld a,(sndtyp)       ; sound to play.
+                and a               ; any sound?
+                jr z,beep1                      ; no.
+                ld b,a              ; outer loop.
+                and a               ; test it.
+                ld c,14                         ; first value to write (0)
+***** ENGINEMSX.ASM
+        endif
+        call joykey
+
+; Sync framerate to 25 Hz
+
+check_if_enough_frames_passed:
+        ld hl,time
+        ld a,(hl)
+        cp 1
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        jr c,check_if_enough_frames_passed
+
+        xor a                   ; sync framerate 25 Hz
+        ld (hl),a
+
+        pop hl
+        pop af
+
+        ret
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; SN76489AN sound chip
+;
+; Registers:
+; 0 - Tone 1 frequency
+; 1 - Tone 1 attenuation
+; 2 - Tone 2 frequency
+; 3 - Tone 21 attenuation
+; 4 - Tone 3 frequency
+; 5 - Tone 3 attenuation
+; 6 - Noise control
+; 7 - Noise attenuation
+;
+; Update noise source:
+;  +-+---------+------------+ +-+ +---+----------------------+
+;  |   | Reg Addr |    Data     | |   |       Data           |
+;  +---+----------+-------------+ +---+----------------------+ 
+;  | 1 | R0 R1 R2 | F6 F7 F8 F9 | | 0 | F0 F1 F2 F3 F4 F5 F6 |
+;  +---+----------+-------------+ +---+----------------------+
+;
+; Update noise source:
+;  +---+----------+---+----+---------+  
+;  |   | Reg Addr |   |    | Shift   |
+;  +---+----------+---+----+---------+
+;  | 1 | R0 R1 R2 | x | FB | NF0 NF1 | 
+;  +---+----------+---+----+---------+ 
+;
+;  NF0 NF1 Shift rate                   FB      Configuration
+;   0   0  N/512                        0       Periodic noise
+;   0   1  N/1024                       1       White noise
+;   1   0  N/2048
+;   1   1  Tone generator #3 Output
+;
+; Update attenuator:
+;  +---+----------+-------------+
+;  |   | Reg Addr |    Data     |
+;  +---+----------+-------------+ 
+;  | 1 | R0 R1 R2 | A0 A1 A2 A3 |
+;  +---+----------+-------------+
+
+beeper:
+        ld hl,sndtyp
+        ld a,(hl)
+        and a
+        jr z,sndskip
+
+        ld a,%10010000          ; PSG channel 0 full volume
+        call psgWrite
+beepLoop:
+        ld hl,sndtyp
+        ld a,(hl)
+        rl a
+        and 3
+        rl a
+        rl a
+        or %10000000
+        call psgWrite
+        ld hl,sndtyp
+        ld a,(hl)
+        rr a
+        rr a
+        call psgWrite
+
+        ld hl,sndtyp
+        ld a,(hl)
+
+        ld b,a
+beepWait:
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+*****
+

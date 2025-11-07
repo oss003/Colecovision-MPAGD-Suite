@@ -59,8 +59,18 @@ NMI:
 
 	call POLLER
 
-;Now restore everything
+; Sound
 
+	if (YFLAG or XFLAG)
+		call psgrout
+		if YFLAG
+			call music_play
+		endif
+	endif
+
+; Now restore everything
+
+nonmi:
 ;	POP	HL
 ;	POP	DE
 ;	POP	BC

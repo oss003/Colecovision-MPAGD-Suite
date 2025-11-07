@@ -160,9 +160,9 @@ MSX_DEVID	equ	$40
 MSX_SWTIO	equ $41
 
 ; PSG PORTS
-MSX_PSGLW	equ $A0 ;A0H    latch address for PSG
-MSX_PSGDW	equ $A1 ;A1H    write data to PSG
-MSX_PSGDR	equ $A2 ;A2H    read data from PSG
+MSX_PSGLW	equ $50 ;A0H    latch address for PSG
+MSX_PSGDW	equ $51 ;A1H    write data to PSG
+MSX_PSGDR	equ $52 ;A2H    read data from PSG
 ;
 MSX_PSGPA	equ 14  ;Port A of PSG
 MSX_PSGPB	equ 15  ;Port B of PSG

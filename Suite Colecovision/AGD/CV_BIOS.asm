@@ -93,14 +93,13 @@ FLOOP:
 ;-----------------------------------------------------------
 
 CV_SETWRT:
-	di
 	ld a,l
 	out (MSX_VDPCW),a
 	ld a,h
 	and 3Fh
 	or 40h
 	out (MSX_VDPCW),a
-	ei
+
 	ret
 
 ;-----------------------------------------------------------
@@ -128,5 +127,5 @@ CV_RDVRM:
 	ld a,h
 	and 3Fh
 	out (MSX_VDPCW),a
-	in a,(MSX_VDPSR)
+	in a,(MSX_VDPDRW)
 	ret

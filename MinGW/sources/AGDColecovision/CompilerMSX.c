@@ -967,7 +967,7 @@ unsigned char cDefaultHop[ MAXHOPS ] =
 unsigned short int cDefaultKeys[ 11 ] =
 {
 	/* keys right, left,  down,   up,   fire, fire2, fire3,  opt1,  opt2,  opt3, opt4 	*/
-	/* Coleco:9      7      0      5      F      A      #      1      2      3     		*/
+	/* Coleco:9      7      0      5      F      A      #      1      2      3     *		*/
 	       0x0609,0x0607,0x0600,0x0605,0x0240,0x0540,0x060b,0x0601,0x0602,0x0603,0x060a
 
 };
@@ -4737,11 +4737,11 @@ void CR_Cls( void )
 
 void CR_Border( void )
 {
-	CompileArgument();
-	WriteInstruction( "ld (MSX_BDRCLR),a" );
-	WriteInstruction( "ld b,a" );
-	WriteInstruction( "ld c,7" );
-	WriteInstruction( "call MSX_WRTVDP" );
+//	CompileArgument();
+//	WriteInstruction( "ld (MSX_BDRCLR),a" );
+//	WriteInstruction( "ld b,a" );
+//	WriteInstruction( "ld c,7" );
+//	WriteInstruction( "call MSX_WRTVDP" );
 }
 
 /* MSX format: foreground*16+background */
