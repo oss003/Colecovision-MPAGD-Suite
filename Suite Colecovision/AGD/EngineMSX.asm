@@ -3874,7 +3874,7 @@ jtest:
 	ld c,d
 	ld hl,CONTROLLER_BUFFER
 	add hl,bc
-	and (hl)
+	cp (hl)
 	jr nz,jkeypressed
 	pop hl
 	pop bc
@@ -3883,7 +3883,7 @@ jtest:
 jkeypressed:
 	pop hl
 	pop bc
-	and a
+	or a
 	ret	
 
 ;		call MSX_SNSMAT
@@ -3999,7 +3999,7 @@ readkeys:
 		ld a,(hl)	    ; get row
 		dec hl
 		call jtest
-		ccf                 ; complement the result (0=not pressed,1=pressed).
+;		ccf                 ; complement the result (0=not pressed,1=pressed).
 		rl e                ; rotate into reading.
 		djnz .loop          ; repeat for all keys.
 
